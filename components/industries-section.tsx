@@ -3,40 +3,42 @@
 import { Card } from "@/components/ui/card"
 import { UtensilsCrossed, Scissors, ShoppingBag, Hotel, Briefcase } from "lucide-react"
 import { useState } from "react"
+import { useLanguage } from "@/lib/language"
 
 export function IndustriesSection() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const { t } = useLanguage()
 
   const industries = [
     {
       icon: UtensilsCrossed,
-      title: "Ресторанти",
-      description: "Автоматични резервации, поръчки и клиентско обслужване",
-      demo: "Здравейте! Бих искал да резервирам маса за 4-ма души...",
+      title: t("industries.restaurant.title"),
+      description: t("industries.restaurant.description"),
+      demo: t("industries.restaurant.demo"),
     },
     {
       icon: Scissors,
-      title: "Фризьорски салон",
-      description: "Записвания за пострижка, напомняния и информация",
-      demo: "Добър ден, искам да запиша час при Данката...",
+      title: t("industries.salon.title"),
+      description: t("industries.salon.description"),
+      demo: t("industries.salon.demo"),
     },
     {
       icon: ShoppingBag,
-      title: "Онлайн магазини",
-      description: "Поддръжка на клиенти, проследяване на поръчки",
-      demo: "Здравейте, имам въпрос относно моята поръчка...",
+      title: t("industries.shop.title"),
+      description: t("industries.shop.description"),
+      demo: t("industries.shop.demo"),
     },
     {
       icon: Hotel,
-      title: "Хотели",
-      description: "Резервации, рецепция и консиерж услуги",
-      demo: "Искам да резервирам стая за периода 15-20 юни...",
+      title: t("industries.hotel.title"),
+      description: t("industries.hotel.description"),
+      demo: t("industries.hotel.demo"),
     },
     {
       icon: Briefcase,
-      title: "Корпоративна поддръжка",
-      description: "Вътрешна комуникация и HR асистенти",
-      demo: "Искам да подам заявка за отпуск...",
+      title: t("industries.corporate.title"),
+      description: t("industries.corporate.description"),
+      demo: t("industries.corporate.demo"),
     },
   ]
 
@@ -45,10 +47,10 @@ export function IndustriesSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Сфери на <span className="neon-text">приложение</span>
+            {t("industries.title")} <span className="neon-text">{t("industries.titleHighlight")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Нашите AI асистенти работят успешно в различни индустрии
+            {t("industries.subtitle")}
           </p>
         </div>
 
@@ -70,7 +72,6 @@ export function IndustriesSection() {
                 <p className="text-sm text-muted-foreground text-center leading-relaxed">{industry.description}</p>
               </div>
 
-              {/* Demo text on hover */}
               {hoveredIndex === index && (
                 <div className="absolute inset-0 bg-primary/95 p-6 flex items-center justify-center text-center animate-in fade-in duration-300">
                   <p className="text-primary-foreground text-sm italic leading-relaxed">"{industry.demo}"</p>

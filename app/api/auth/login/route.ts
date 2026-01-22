@@ -10,9 +10,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Имейл и парола са задължителни" }, { status: 400 })
     }
 
-    // Find user
     const result = await sql`
-      SELECT id, email, name, password_hash FROM users WHERE email = ${email}
+      SELECT id, email, name, password_hash, role FROM users WHERE email = ${email}
     `
 
     if (result.length === 0) {
@@ -33,6 +32,7 @@ export async function POST(request: NextRequest) {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role, // Include role in login response
       },
     })
   } catch (error) {

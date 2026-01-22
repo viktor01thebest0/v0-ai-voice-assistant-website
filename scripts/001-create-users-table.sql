@@ -4,9 +4,14 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   name VARCHAR(255) NOT NULL,
+  -- added role field to distinguish between admin and client users
+  role VARCHAR(50) NOT NULL DEFAULT 'client' CHECK (role IN ('admin', 'client')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create index on email for faster lookups
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- added index for role filtering
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);

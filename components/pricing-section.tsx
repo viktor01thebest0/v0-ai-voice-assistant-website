@@ -1,57 +1,61 @@
-import { Button } from "@/components/ui/button"
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { Check } from "lucide-react"
+import { useLanguage } from "@/lib/language"
 
 export function PricingSection() {
+  const { t } = useLanguage()
+
   const plans = [
     {
-      name: "Starter",
+      name: t("pricing.starter.name"),
       price: "299",
-      period: "месец",
-      description: "Идеален за малки бизнеси и стартъпи",
+      period: t("pricing.month"),
+      description: t("pricing.starter.description"),
       features: [
-        "До 1000 разговора месечно",
-        "Основни интеграции",
-        "Email поддръжка",
-        "Базов AI модел",
-        "1 гласов асистент",
+        t("pricing.starter.f1"),
+        t("pricing.starter.f2"),
+        t("pricing.starter.f3"),
+        t("pricing.starter.f4"),
+        t("pricing.starter.f5"),
       ],
-      cta: "Започни сега",
+      cta: t("pricing.starter.cta"),
       popular: false,
     },
     {
-      name: "Pro",
+      name: t("pricing.pro.name"),
       price: "599",
-      period: "месец",
-      description: "За растящи компании с високи изисквания",
+      period: t("pricing.month"),
+      description: t("pricing.pro.description"),
       features: [
-        "До 5000 разговора месечно",
-        "Всички интеграции",
-        "Приоритетна поддръжка",
-        "Персонализиран AI модел",
-        "До 3 гласови асистента",
-        "Advanced анализ",
-        "Custom гласове",
+        t("pricing.pro.f1"),
+        t("pricing.pro.f2"),
+        t("pricing.pro.f3"),
+        t("pricing.pro.f4"),
+        t("pricing.pro.f5"),
+        t("pricing.pro.f6"),
+        t("pricing.pro.f7"),
       ],
-      cta: "Избери Pro",
+      cta: t("pricing.pro.cta"),
       popular: true,
     },
     {
-      name: "Enterprise",
+      name: t("pricing.enterprise.name"),
       price: "Custom",
       period: "",
-      description: "За големи корпорации и специални нужди",
+      description: t("pricing.enterprise.description"),
       features: [
-        "Неограничени разговори",
-        "Dedicated инфраструктура",
-        "24/7 техническа поддръжка",
-        "Custom AI обучение",
-        "Неограничени асистенти",
-        "White label решение",
-        "SLA гаранция",
-        "On-premise опция",
+        t("pricing.enterprise.f1"),
+        t("pricing.enterprise.f2"),
+        t("pricing.enterprise.f3"),
+        t("pricing.enterprise.f4"),
+        t("pricing.enterprise.f5"),
+        t("pricing.enterprise.f6"),
+        t("pricing.enterprise.f7"),
+        t("pricing.enterprise.f8"),
       ],
-      cta: "Свържи се с нас",
+      cta: t("pricing.enterprise.cta"),
       popular: false,
     },
   ]
@@ -61,23 +65,23 @@ export function PricingSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Планове и <span className="neon-text">цени</span>
+            {t("pricing.title")} <span className="neon-text">{t("pricing.titleHighlight")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Изберете плана, който отговаря на вашите нужди
+            {t("pricing.subtitle")}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-primary" />
-              <span>Без начална такса</span>
+              <span>{t("pricing.noFee")}</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-primary" />
-              <span>30-дневна гаранция</span>
+              <span>{t("pricing.guarantee")}</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-primary" />
-              <span>Без обвързващ договор</span>
+              <span>{t("pricing.noContract")}</span>
             </div>
           </div>
         </div>
@@ -93,7 +97,7 @@ export function PricingSection() {
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="px-4 py-1 bg-primary text-primary-foreground text-sm font-bold rounded-full animate-pulse-glow">
-                    Най-популярен
+                    {t("pricing.popular")}
                   </span>
                 </div>
               )}
@@ -107,7 +111,7 @@ export function PricingSection() {
                 <p className="text-muted-foreground">{plan.description}</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-4">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -115,17 +119,6 @@ export function PricingSection() {
                   </li>
                 ))}
               </ul>
-
-              <Button
-                className={`w-full ${
-                  plan.popular
-                    ? "bg-primary hover:bg-primary/90 text-primary-foreground animate-pulse-glow"
-                    : "bg-secondary hover:bg-secondary/80"
-                }`}
-                size="lg"
-              >
-                {plan.cta}
-              </Button>
             </Card>
           ))}
         </div>

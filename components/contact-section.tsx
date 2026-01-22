@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Mail, Phone, MapPin } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useLanguage } from "@/lib/language"
 
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const { t } = useLanguage()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -41,22 +42,21 @@ export function ContactSection() {
 
       if (response.ok) {
         toast({
-          title: "Успех!",
+          title: t("contact.success"),
           description: result.message,
         })
-        // Reset form
         e.currentTarget.reset()
       } else {
         toast({
-          title: "Грешка",
+          title: t("contact.error"),
           description: result.error,
           variant: "destructive",
         })
       }
     } catch (error) {
       toast({
-        title: "Грешка",
-        description: "Възникна грешка при изпращането на заявката",
+        title: t("contact.error"),
+        description: t("contact.errorMessage"),
         variant: "destructive",
       })
     } finally {
@@ -69,10 +69,10 @@ export function ContactSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Попитай ни <span className="neon-text">нещо</span>
+            {t("contact.title")} <span className="neon-text">{t("contact.titleHighlight")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Разкажи ни за бизнеса си и ще ти създадем уникален AI глас
+            {t("contact.subtitle")}
           </p>
         </div>
 
@@ -80,31 +80,31 @@ export function ContactSection() {
           <Card className="p-8 bg-card/50 backdrop-blur border-border">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="name">Име и фамилия</Label>
-                <Input id="name" name="name" placeholder="Иван Иванов" required />
+                <Label htmlFor="name">{t("contact.name")}</Label>
+                <Input id="name" name="name" placeholder={t("contact.namePlaceholder")} required />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="ivan@example.com" required />
+                <Label htmlFor="email">{t("contact.email")}</Label>
+                <Input id="email" name="email" type="email" placeholder={t("contact.emailPlaceholder")} required />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Телефон</Label>
-                <Input id="phone" name="phone" type="tel" placeholder="+359 888 123 456" />
+                <Label htmlFor="phone">{t("contact.phone")}</Label>
+                <Input id="phone" name="phone" type="tel" placeholder={t("contact.phonePlaceholder")} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company">Компания</Label>
-                <Input id="company" name="company" placeholder="Моята компания" />
+                <Label htmlFor="company">{t("contact.company")}</Label>
+                <Input id="company" name="company" placeholder={t("contact.companyPlaceholder")} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">Разкажете за вашия бизнес</Label>
+                <Label htmlFor="message">{t("contact.message")}</Label>
                 <Textarea
                   id="message"
                   name="message"
-                  placeholder="Опишете вашите нужди и как можем да ви помогнем..."
+                  placeholder={t("contact.messagePlaceholder")}
                   rows={4}
                   required
                 />
@@ -116,7 +116,7 @@ export function ContactSection() {
                   className="flex-1 bg-primary hover:bg-primary/90 animate-pulse-glow"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Изпраща се..." : "Изпрати заявка"}
+                  {isSubmitting ? t("contact.submitting") : t("contact.submit")}
                 </Button>
               </div>
             </form>
@@ -129,7 +129,7 @@ export function ContactSection() {
                   <Mail className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold mb-2">Email</h3>
+                  <h3 className="text-lg font-bold mb-2">{t("contact.emailLabel")}</h3>
                   <p className="text-muted-foreground">contact@voiceai.bg</p>
                   <p className="text-muted-foreground">sales@voiceai.bg</p>
                 </div>
@@ -142,7 +142,7 @@ export function ContactSection() {
                   <Phone className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold mb-2">Телефон</h3>
+                  <h3 className="text-lg font-bold mb-2">{t("contact.phoneLabel")}</h3>
                   <p className="text-muted-foreground">+359 2 123 4567</p>
                   <p className="text-muted-foreground">+359 888 123 456</p>
                 </div>
@@ -155,7 +155,7 @@ export function ContactSection() {
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold mb-2">Офис</h3>
+                  <h3 className="text-lg font-bold mb-2">{t("contact.officeLabel")}</h3>
                   <p className="text-muted-foreground">бул. Витоша 1</p>
                   <p className="text-muted-foreground">София 1000, България</p>
                 </div>
@@ -163,9 +163,9 @@ export function ContactSection() {
             </Card>
 
             <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-6 border border-primary/20">
-              <h3 className="font-bold mb-2">Работно време</h3>
-              <p className="text-sm text-muted-foreground">Понеделник - Петък: 9:00 - 18:00</p>
-              <p className="text-sm text-muted-foreground">AI асистентите работят 24/7 😉</p>
+              <h3 className="font-bold mb-2">{t("contact.workingHours")}</h3>
+              <p className="text-sm text-muted-foreground">{t("contact.workingHoursText")}</p>
+              <p className="text-sm text-muted-foreground">{t("contact.aiWorkingHours")}</p>
             </div>
           </div>
         </div>

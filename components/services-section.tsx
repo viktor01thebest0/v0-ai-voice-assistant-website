@@ -1,31 +1,36 @@
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { MessageSquare, Phone, Link2, BarChart3 } from "lucide-react"
+import { useLanguage } from "@/lib/language"
 
 export function ServicesSection() {
+  const { t } = useLanguage()
+
   const services = [
     {
       icon: Phone,
-      title: "Гласови AI асистенти",
-      description: "Автоматизирани обаждания, резервации и клиентско обслужване 24/7 с естествен човешки глас.",
-      features: ["Автоматични обаждания", "Резервации и записвания", "Клиентска поддръжка", "Многоезична поддръжка"],
+      title: t("services.voice.title"),
+      description: t("services.voice.description"),
+      features: [t("services.voice.f1"), t("services.voice.f2"), t("services.voice.f3"), t("services.voice.f4")],
     },
     {
       icon: MessageSquare,
-      title: "Чатботи с естествен език",
-      description: "Интелигентни текстови асистенти за сайтове, социални мрежи и месинджъри.",
-      features: ["Facebook Messenger", "WhatsApp интеграция", "Уеб чат", "Instagram DM"],
+      title: t("services.chat.title"),
+      description: t("services.chat.description"),
+      features: [t("services.chat.f1"), t("services.chat.f2"), t("services.chat.f3"), t("services.chat.f4")],
     },
     {
       icon: Link2,
-      title: "Интеграции",
-      description: "Свързване с вашите съществуващи системи за безпроблемна автоматизация.",
-      features: ["CRM системи", "ERP софтуер", "Календари", "Телефонни централи"],
+      title: t("services.integration.title"),
+      description: t("services.integration.description"),
+      features: [t("services.integration.f1"), t("services.integration.f2"), t("services.integration.f3"), t("services.integration.f4")],
     },
     {
       icon: BarChart3,
-      title: "AI анализ и отчетност",
-      description: "Проследяване на ефективността и детайлни отчети за всяко взаимодействие.",
-      features: ["Real-time статистики", "Анализ на разговори", "ROI отчети", "Sentiment анализ"],
+      title: t("services.analytics.title"),
+      description: t("services.analytics.description"),
+      features: [t("services.analytics.f1"), t("services.analytics.f2"), t("services.analytics.f3"), t("services.analytics.f4")],
     },
   ]
 
@@ -34,10 +39,10 @@ export function ServicesSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Нашите <span className="neon-text">услуги</span>
+            {t("services.title")} <span className="neon-text">{t("services.titleHighlight")}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Пълен пакет от AI решения за автоматизация на вашия бизнес
+            {t("services.subtitle")}
           </p>
         </div>
 

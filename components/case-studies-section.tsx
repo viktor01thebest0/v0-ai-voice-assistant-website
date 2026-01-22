@@ -1,37 +1,42 @@
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { TrendingDown, TrendingUp, Users, Clock } from "lucide-react"
+import { useLanguage } from "@/lib/language"
 
 export function CaseStudiesSection() {
+  const { t } = useLanguage()
+
   const cases = [
     {
-      company: 'Ресторант "Традиция"',
-      industry: "Ресторантьорство",
+      company: t("cases.case1.company"),
+      industry: t("cases.case1.industry"),
       results: [
-        { icon: TrendingDown, label: "Разходи", value: "-45%", positive: true },
-        { icon: Users, label: "Резервации", value: "+80%", positive: true },
-        { icon: Clock, label: "Време за отговор", value: "< 30 сек", positive: true },
+        { icon: TrendingDown, label: t("cases.costs"), value: "-45%", positive: true },
+        { icon: Users, label: t("cases.reservations"), value: "+80%", positive: true },
+        { icon: Clock, label: t("cases.responseTime"), value: "< 30 sec", positive: true },
       ],
-      description: "Автоматизирано приемане на резервации и отговаряне на въпроси 24/7",
+      description: t("cases.case1.description"),
     },
     {
-      company: 'Фризьорски салон "Luxury Hair"',
-      industry: "Лични услуги",
+      company: t("cases.case2.company"),
+      industry: t("cases.case2.industry"),
       results: [
-        { icon: Users, label: "Записани клиенти", value: "+65%", positive: true },
-        { icon: TrendingDown, label: "Пропуснати обаждания", value: "-90%", positive: true },
-        { icon: TrendingUp, label: "Удовлетвореност", value: "95%", positive: true },
+        { icon: Users, label: t("cases.clients"), value: "+65%", positive: true },
+        { icon: TrendingDown, label: t("cases.missedCalls"), value: "-90%", positive: true },
+        { icon: TrendingUp, label: t("cases.satisfaction"), value: "95%", positive: true },
       ],
-      description: "AI асистент за записване на часове и напомняния на клиенти",
+      description: t("cases.case2.description"),
     },
     {
-      company: 'E-shop "TechZone"',
-      industry: "E-commerce",
+      company: t("cases.case3.company"),
+      industry: t("cases.case3.industry"),
       results: [
-        { icon: TrendingUp, label: "Продажби", value: "+55%", positive: true },
-        { icon: Users, label: "Обслужени клиенти", value: "+120%", positive: true },
-        { icon: TrendingDown, label: "Време за отговор", value: "-85%", positive: true },
+        { icon: TrendingUp, label: t("cases.sales"), value: "+55%", positive: true },
+        { icon: Users, label: t("cases.servedClients"), value: "+120%", positive: true },
+        { icon: TrendingDown, label: t("cases.responseTime"), value: "-85%", positive: true },
       ],
-      description: "24/7 клиентска поддръжка и асистент за продажби",
+      description: t("cases.case3.description"),
     },
   ]
 
@@ -40,9 +45,9 @@ export function CaseStudiesSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Истории на <span className="neon-text">успеха</span>
+            {t("cases.title")} <span className="neon-text">{t("cases.titleHighlight")}</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">Реални резултати от реални компании</p>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">{t("cases.subtitle")}</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">

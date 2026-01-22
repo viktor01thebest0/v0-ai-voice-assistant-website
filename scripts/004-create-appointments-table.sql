@@ -8,11 +8,11 @@ CREATE TABLE IF NOT EXISTS appointments (
   service VARCHAR(255) NOT NULL,
   stylist VARCHAR(255) NOT NULL,
   status VARCHAR(50) DEFAULT 'confirmed',
-  -- Removed google_calendar_event_id field since we're not using Google Calendar
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Added IF NOT EXISTS to prevent errors when indexes already exist
 -- Create index for faster lookups
-CREATE INDEX idx_appointments_date_time ON appointments(appointment_date, appointment_time, stylist);
-CREATE INDEX idx_appointments_phone ON appointments(customer_phone);
+CREATE INDEX IF NOT EXISTS idx_appointments_date_time ON appointments(appointment_date, appointment_time, stylist);
+CREATE INDEX IF NOT EXISTS idx_appointments_phone ON appointments(customer_phone);

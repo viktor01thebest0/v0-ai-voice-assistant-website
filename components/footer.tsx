@@ -1,8 +1,13 @@
+"use client"
+
 import Link from "next/link"
 import { Facebook, Linkedin, Twitter, Instagram } from "lucide-react"
 import Image from "next/image"
+import { useLanguage } from "@/lib/language"
 
 export function Footer() {
+  const { t } = useLanguage()
+
   return (
     <footer className="border-t border-border bg-background">
       <div className="container mx-auto px-4 py-12">
@@ -15,85 +20,84 @@ export function Footer() {
                 <span className="text-xs text-muted-foreground italic">Give your business a voice.</span>
               </div>
             </div>
-            {/* </CHANGE> */}
             <p className="text-sm text-muted-foreground">
-              Създаваме гласови AI асистенти, които работят 24/7 и говорят като хора.
+              {t("footer.description")}
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold mb-4">Продукти</h4>
+            <h4 className="font-bold mb-4">{t("footer.products")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/#services" className="hover:text-foreground transition-colors">
-                  Гласови асистенти
+                  {t("footer.voiceAssistants")}
                 </Link>
               </li>
               <li>
                 <Link href="/#services" className="hover:text-foreground transition-colors">
-                  Чатботи
+                  {t("footer.chatbots")}
                 </Link>
               </li>
               <li>
                 <Link href="/#services" className="hover:text-foreground transition-colors">
-                  Интеграции
+                  {t("footer.integrations")}
                 </Link>
               </li>
               <li>
                 <Link href="/#services" className="hover:text-foreground transition-colors">
-                  Анализ
+                  {t("footer.analytics")}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold mb-4">Компания</h4>
+            <h4 className="font-bold mb-4">{t("footer.company")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/#about" className="hover:text-foreground transition-colors">
-                  За нас
+                  {t("footer.aboutUs")}
                 </Link>
               </li>
               <li>
                 <Link href="/#case-studies" className="hover:text-foreground transition-colors">
-                  Клиенти
+                  {t("footer.clients")}
                 </Link>
               </li>
               <li>
                 <Link href="/#pricing" className="hover:text-foreground transition-colors">
-                  Цени
+                  {t("footer.prices")}
                 </Link>
               </li>
               <li>
                 <Link href="/#contact" className="hover:text-foreground transition-colors">
-                  Контакти
+                  {t("footer.contacts")}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold mb-4">Правна информация</h4>
+            <h4 className="font-bold mb-4">{t("footer.legal")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/privacy" className="hover:text-foreground transition-colors">
-                  Поверителност
+                  {t("footer.privacy")}
                 </Link>
               </li>
               <li>
                 <Link href="/terms" className="hover:text-foreground transition-colors">
-                  Условия за ползване
+                  {t("footer.terms")}
                 </Link>
               </li>
               <li>
                 <Link href="/gdpr" className="hover:text-foreground transition-colors">
-                  GDPR
+                  {t("footer.gdpr")}
                 </Link>
               </li>
               <li>
                 <Link href="/cookies" className="hover:text-foreground transition-colors">
-                  Бисквитки
+                  {t("footer.cookies")}
                 </Link>
               </li>
             </ul>
@@ -101,8 +105,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 Voxal. Всички права запазени.</p>
-          {/* </CHANGE> */}
+          <p className="text-sm text-muted-foreground">{t("footer.copyright")}</p>
 
           <div className="flex items-center gap-4">
             <Link

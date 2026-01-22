@@ -4,6 +4,7 @@ export interface User {
   id: string
   email: string
   name: string
+  role: "admin" | "client" // Role can be either admin or client
 }
 
 const AUTH_STORAGE_KEY = "voxal_user"
@@ -23,4 +24,16 @@ export function getCurrentUser(): User | null {
   } catch {
     return null
   }
+}
+
+export function isAdmin(user: User | null): boolean {
+  return user?.role === "admin"
+}
+
+export function isClient(user: User | null): boolean {
+  return user?.role === "client"
+}
+
+export function getRoleDisplayName(role: "admin" | "client"): string {
+  return role === "admin" ? "Администратор" : "Клиент"
 }
