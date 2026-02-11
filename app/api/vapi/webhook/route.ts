@@ -313,22 +313,48 @@ function getStylists() {
   }
 }
 
-// Handle end of call report - extract and save any appointment data
+// Handle end of call report - save call data to the database
 async function handleEndOfCall(message: any) {
   try {
     const { call, transcript, summary, recordingUrl } = message
     
-    console.log("[Vapi Webhook] Call ended:", {
-      callId: call?.id,
-      duration: call?.duration,
-      summary,
-      recordingUrl
-    })
+    const callId = call?.id || `call_${Date.now()}`
+    const durationSeconds = call?.duration || 0
+    const customerPhone = call?.customer?.number || "unknown"
+    const status = call?.endedReason === "assistant-ended-call" ? "completed" : (call?.endedReason?.includes("error") ? "failed" : "completed")
     
-    // You can add additional logic here to:
-    // - Save call logs to the database
-    // - Send follow-up SMS/email
-    // - Analyze sentiment from the transcript
+    await sql`
+      INSERT INTO call_logs (
+        vapi_call_id,
+        customer_phone,
+        duration_seconds,
+        status,
+        summary,
+        transcript,
+        recording_url,
+        ended_reason,
+        created_at
+      ) VALUES (
+        ${callId},
+        ${customerPhone},
+        ${durationSeconds},
+        ${status},
+        ${summary || null},
+        ${transcript || null},
+        ${recordingUrl || null},
+        ${call?.endedReason || null},
+        NOW()
+      )
+      ON CONFLICT (vapi_call_id) DO UPDATE SET
+        duration_seconds = EXCLUDED.duration_seconds,
+        status = EXCLUDED.status,
+        summary = EXCLUDED.summary,
+        transcript = EXCLUDED.transcript,
+        recording_url = EXCLUDED.recording_url,
+        ended_reason = EXCLUDED.ended_reason
+    `
+    
+    console.log("[Vapi Webhook] Call log saved:", callId)
     
   } catch (error) {
     console.error("[Vapi Webhook] End of call error:", error)
