@@ -9,31 +9,68 @@ import { Progress } from "@/components/ui/progress"
 import { getCurrentUser, type User } from "@/lib/auth"
 import { useLanguage } from "@/lib/language"
 import { 
-  MessageSquare, 
+  Phone, 
   Clock, 
   TrendingUp, 
   ArrowLeft,
-  Bot,
+  CheckCircle,
+  XCircle,
   Users,
-  Calendar,
-  BarChart3
+  BarChart3,
+  PhoneCall,
+  Timer,
+  RefreshCw
 } from "lucide-react"
+
+interface VapiAnalytics {
+  totalCalls: number
+  callsThisMonth: number
+  totalMinutes: number
+  totalHours: number
+  minutesThisMonth: number
+  avgDurationSeconds: number
+  successfulCalls: number
+  failedCalls: number
+  successRate: number
+  uniqueCustomers: number
+  trend: number
+  recentCalls: {
+    id: string
+    status: string
+    startedAt: string
+    endedAt: string
+    duration: number
+    customerPhone: string
+    endedReason: string
+  }[]
+}
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [analytics, setAnalytics] = useState<VapiAnalytics | null>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(true)
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null)
   const router = useRouter()
   const { t } = useLanguage()
 
-  // Simulated metrics data - in production, fetch from database
-  const [metrics] = useState({
-    totalConversations: 1247,
-    hoursSaved: 156,
-    efficiencyIncrease: 78,
-    activeAssistants: 3,
-    totalCustomers: 89,
-    appointmentsThisMonth: 234
-  })
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true)
+    setAnalyticsError(null)
+    try {
+      const response = await fetch("/api/vapi/analytics")
+      if (!response.ok) {
+        throw new Error("Failed to fetch analytics")
+      }
+      const data = await response.json()
+      setAnalytics(data)
+    } catch (error) {
+      setAnalyticsError("Failed to load analytics")
+      console.error("Analytics error:", error)
+    } finally {
+      setAnalyticsLoading(false)
+    }
+  }
 
   useEffect(() => {
     const currentUser = getCurrentUser()
@@ -43,7 +80,10 @@ export default function DashboardPage() {
     }
     setUser(currentUser)
     setIsLoading(false)
+    fetchAnalytics()
   }, [router])
+
+  const isBg = t("nav.about") === "За нас"
 
   if (isLoading) {
     return (
@@ -55,6 +95,19 @@ export default function DashboardPage() {
 
   if (!user) {
     return null
+  }
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const formatPhoneNumber = (phone: string) => {
+    if (phone.length > 8) {
+      return `${phone.slice(0, 4)}****${phone.slice(-4)}`
+    }
+    return phone
   }
 
   return (
@@ -71,7 +124,7 @@ export default function DashboardPage() {
             <Link href="/">
               <Button variant="ghost" size="sm" className="mb-4">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                {t("nav.about") === "За нас" ? "Назад към началото" : "Back to home"}
+                {isBg ? "Назад към началото" : "Back to home"}
               </Button>
             </Link>
             <h1 className="text-3xl font-bold neon-text">{t("dashboard.title")}</h1>
@@ -82,164 +135,232 @@ export default function DashboardPage() {
               </span>
             </p>
           </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchAnalytics}
+            disabled={analyticsLoading}
+            className="gap-2 bg-transparent"
+          >
+            <RefreshCw className={`h-4 w-4 ${analyticsLoading ? 'animate-spin' : ''}`} />
+            {isBg ? "Обнови" : "Refresh"}
+          </Button>
         </div>
 
+        {analyticsError && (
+          <Card className="bg-destructive/10 border-destructive/50 mb-6">
+            <CardContent className="py-4">
+              <p className="text-destructive text-sm">{analyticsError}</p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Total Conversations */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {/* Total Calls */}
           <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("dashboard.conversations")}
+                {isBg ? "Общо обаждания" : "Total Calls"}
               </CardTitle>
-              <MessageSquare className="h-5 w-5 text-primary" />
+              <Phone className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{metrics.totalConversations.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-foreground">
+                {analyticsLoading ? "..." : analytics?.totalCalls.toLocaleString() || 0}
+              </div>
+              {analytics && analytics.trend !== 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <span className={analytics.trend > 0 ? "text-green-500" : "text-red-500"}>
+                    {analytics.trend > 0 ? "+" : ""}{analytics.trend}%
+                  </span> {isBg ? "тренд" : "trend"}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Calls This Month */}
+          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {isBg ? "Обаждания този месец" : "Calls This Month"}
+              </CardTitle>
+              <PhoneCall className="h-5 w-5 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">
+                {analyticsLoading ? "..." : analytics?.callsThisMonth || 0}
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+12%</span> {t("nav.about") === "За нас" ? "спрямо миналия месец" : "from last month"}
+                {analyticsLoading ? "..." : `${analytics?.minutesThisMonth || 0} ${isBg ? "минути" : "minutes"}`}
               </p>
             </CardContent>
           </Card>
 
-          {/* Hours Saved */}
+          {/* Total Duration */}
           <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("dashboard.hours")}
+                {isBg ? "Общо време" : "Total Duration"}
               </CardTitle>
               <Clock className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{metrics.hoursSaved}</div>
+              <div className="text-3xl font-bold text-foreground">
+                {analyticsLoading ? "..." : `${analytics?.totalHours || 0}h`}
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+8%</span> {t("nav.about") === "За нас" ? "спрямо миналия месец" : "from last month"}
+                {analyticsLoading ? "..." : `${analytics?.totalMinutes || 0} ${isBg ? "минути общо" : "minutes total"}`}
               </p>
             </CardContent>
           </Card>
 
-          {/* Efficiency Increase */}
+          {/* Average Duration */}
           <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("dashboard.efficiency")}
+                {isBg ? "Средна продължителност" : "Avg Duration"}
               </CardTitle>
-              <TrendingUp className="h-5 w-5 text-primary" />
+              <Timer className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{metrics.efficiencyIncrease}%</div>
-              <Progress value={metrics.efficiencyIncrease} className="mt-2 h-2" />
+              <div className="text-3xl font-bold text-foreground">
+                {analyticsLoading ? "..." : formatDuration(analytics?.avgDurationSeconds || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isBg ? "на обаждане" : "per call"}
+              </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Secondary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Active Assistants */}
+          {/* Success Rate */}
           <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("nav.about") === "За нас" ? "Активни асистенти" : "Active Assistants"}
+                {isBg ? "Успешни обаждания" : "Success Rate"}
               </CardTitle>
-              <Bot className="h-5 w-5 text-primary" />
+              <TrendingUp className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{metrics.activeAssistants}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("nav.about") === "За нас" ? "Работят 24/7" : "Working 24/7"}
-              </p>
+              <div className="text-3xl font-bold text-foreground">
+                {analyticsLoading ? "..." : `${analytics?.successRate || 0}%`}
+              </div>
+              <Progress value={analytics?.successRate || 0} className="mt-2 h-2" />
             </CardContent>
           </Card>
 
-          {/* Total Customers */}
+          {/* Successful vs Failed */}
           <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("nav.about") === "За нас" ? "Обслужени клиенти" : "Customers Served"}
+                {isBg ? "Статус на обажданията" : "Call Status"}
+              </CardTitle>
+              <CheckCircle className="h-5 w-5 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div>
+                  <div className="text-2xl font-bold text-green-500">
+                    {analyticsLoading ? "..." : analytics?.successfulCalls || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{isBg ? "Успешни" : "Successful"}</p>
+                </div>
+                <div className="h-10 w-px bg-border" />
+                <div>
+                  <div className="text-2xl font-bold text-red-500">
+                    {analyticsLoading ? "..." : analytics?.failedCalls || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{isBg ? "Неуспешни" : "Failed"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Unique Customers */}
+          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {isBg ? "Уникални клиенти" : "Unique Customers"}
               </CardTitle>
               <Users className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{metrics.totalCustomers}</div>
+              <div className="text-3xl font-bold text-foreground">
+                {analyticsLoading ? "..." : analytics?.uniqueCustomers || 0}
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+23</span> {t("nav.about") === "За нас" ? "нови този месец" : "new this month"}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Appointments This Month */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t("nav.about") === "За нас" ? "Записани часове" : "Appointments Booked"}
-              </CardTitle>
-              <Calendar className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{metrics.appointmentsThisMonth}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("nav.about") === "За нас" ? "този месец" : "this month"}
+                {isBg ? "различни номера" : "different numbers"}
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Performance Overview */}
+        {/* Recent Calls */}
         <Card className="bg-card/50 backdrop-blur border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary" />
-                  {t("nav.about") === "За нас" ? "Преглед на ефективността" : "Performance Overview"}
+                  {isBg ? "Последни обаждания" : "Recent Calls"}
                 </CardTitle>
                 <CardDescription>
-                  {t("nav.about") === "За нас" 
-                    ? "Как AI асистентите подобряват вашия бизнес" 
-                    : "How AI assistants are improving your business"}
+                  {isBg ? "Последните 10 обаждания от Vapi" : "Last 10 calls from Vapi"}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("nav.about") === "За нас" ? "Удовлетвореност на клиентите" : "Customer Satisfaction"}
-                  </span>
-                  <span className="text-sm font-medium text-primary">92%</span>
-                </div>
-                <Progress value={92} className="h-2" />
+            {analyticsLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {isBg ? "Зареждане..." : "Loading..."}
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("nav.about") === "За нас" ? "Успешно резервирани часове" : "Successful Bookings"}
-                  </span>
-                  <span className="text-sm font-medium text-primary">87%</span>
-                </div>
-                <Progress value={87} className="h-2" />
+            ) : analytics?.recentCalls && analytics.recentCalls.length > 0 ? (
+              <div className="space-y-3">
+                {analytics.recentCalls.map((call) => (
+                  <div 
+                    key={call.id} 
+                    className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border hover:border-primary/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {call.endedReason === "assistant-ended-call" ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <div>
+                        <p className="text-sm font-medium">
+                          {formatPhoneNumber(call.customerPhone)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(call.startedAt).toLocaleString(isBg ? 'bg-BG' : 'en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {formatDuration(call.duration)}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {call.endedReason?.replace(/-/g, ' ') || call.status}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("nav.about") === "За нас" ? "Разрешени запитвания" : "Resolved Inquiries"}
-                  </span>
-                  <span className="text-sm font-medium text-primary">95%</span>
-                </div>
-                <Progress value={95} className="h-2" />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {isBg ? "Няма обаждания все още" : "No calls yet"}
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("nav.about") === "За нас" ? "Намалено време за отговор" : "Reduced Response Time"}
-                  </span>
-                  <span className="text-sm font-medium text-primary">78%</span>
-                </div>
-                <Progress value={78} className="h-2" />
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
