@@ -19,22 +19,22 @@ export function VoiceWaveAnimation() {
   }, [])
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       {/* Central orb */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-40 h-40 rounded-full bg-primary/20 animate-pulse-glow blur-xl" />
-        <div className="absolute w-32 h-32 rounded-full bg-primary/40 animate-pulse" />
-        <div className="absolute w-24 h-24 rounded-full bg-primary animate-float" />
+        <div className="w-24 h-24 md:w-40 md:h-40 rounded-full bg-primary/20 animate-pulse-glow blur-xl" />
+        <div className="absolute w-20 h-20 md:w-32 md:h-32 rounded-full bg-primary/40 animate-pulse" />
+        <div className="absolute w-14 h-14 md:w-24 md:h-24 rounded-full bg-primary animate-float" />
       </div>
 
       {/* Voice wave bars */}
-      <div className="absolute inset-0 flex items-center justify-center gap-1">
-        {bars.map((height, i) => (
+      <div className="absolute inset-0 flex items-center justify-center gap-0.5 md:gap-1 px-4">
+        {bars.slice(0, 20).map((height, i) => (
           <div
             key={i}
-            className="w-1.5 bg-primary rounded-full animate-wave"
+            className="w-1 md:w-1.5 bg-primary rounded-full animate-wave"
             style={{
-              height: `${height}px`,
+              height: `${Math.min(height, 60)}px`,
               animationDelay: `${i * 0.05}s`,
               opacity: 0.7,
             }}
@@ -45,13 +45,13 @@ export function VoiceWaveAnimation() {
       {/* Decorative rings */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div
-          className="w-64 h-64 rounded-full border-2 border-primary/20 animate-ping"
+          className="w-40 h-40 md:w-64 md:h-64 rounded-full border-2 border-primary/20 animate-ping"
           style={{ animationDuration: "3s" }}
         />
       </div>
       <div className="absolute inset-0 flex items-center justify-center">
         <div
-          className="w-80 h-80 rounded-full border border-primary/10 animate-ping"
+          className="w-52 h-52 md:w-80 md:h-80 rounded-full border border-primary/10 animate-ping"
           style={{ animationDuration: "4s" }}
         />
       </div>
