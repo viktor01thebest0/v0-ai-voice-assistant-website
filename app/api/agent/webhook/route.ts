@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         VALUES (
           ${callId || null},
           ${data.customer_name || null},
-          ${data.phone_number || null},
+          ${data.phone_number || body.message.call?.customer?.number || null},
           ${data.service_type || null},
           ${data.appointment_date || null},
           ${data.appointment_time || null},
