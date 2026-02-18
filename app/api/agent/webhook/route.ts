@@ -10,17 +10,18 @@ export async function POST(req: NextRequest) {
       const callId = body.message.call?.id
 
       if (data) {
-        await sql`
-          INSERT INTO bookings (call_id, customer_name, phone_number, service_type, appointment_date, appointment_time)
-          VALUES (
-            ${callId || null},
-            ${data.customer_name || null},
-            ${data.phone_number || null},
-            ${data.service_type || null},
-            ${data.appointment_date || null},
-            ${data.appointment_time || null}
-          )
-        `
+       await sql`
+        INSERT INTO bookings (call_id, customer_name, phone_number, service_type, appointment_date, appointment_time, stylist)
+        VALUES (
+          ${callId || null},
+          ${data.customer_name || null},
+          ${data.phone_number || null},
+          ${data.service_type || null},
+          ${data.appointment_date || null},
+          ${data.appointment_time || null},
+          ${data.stylist || null}
+        )
+      `
       }
     }
 
