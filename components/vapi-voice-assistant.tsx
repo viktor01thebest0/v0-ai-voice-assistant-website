@@ -59,8 +59,28 @@ export function VapiVoiceAssistant() {
       setError(null)
     })
 
-    vapiInstance.on("call-end", () => {
+    vapiInstance.on("call-end", async () => {
+      console.log("[v0] Call ended, attempting to save booking from transcript...")
       setCallStatus("idle")
+      
+      // Try to save booking when call ends using transcript data
+      // This is a fallback when structured data is not available
+      try {
+        const response = await fetch("/api/bookings/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            call_id: `call-${Date.now()}`,
+            customer_name: "Voice Call Customer",
+            notes: "Booking from voice call - please review transcript for details",
+            created_via: "vapi-web-call"
+          }),
+        })
+        const result = await response.json()
+        console.log("[v0] Call-end booking save result:", result)
+      } catch (err) {
+        console.error("[v0] Error saving on call-end:", err)
+      }
     })
 
     vapiInstance.on("error", (err: Error) => {
