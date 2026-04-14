@@ -70,6 +70,9 @@ export function VapiVoiceAssistant() {
     })
 
     vapiInstance.on("message", async (message: VapiMessage) => {
+      // Debug: Log all messages
+      console.log("[v0] VAPI message received:", JSON.stringify(message, null, 2))
+      
       // Handle transcript updates
       if (message.type === "transcript" && message.transcriptType === "final" && message.transcript) {
         const role = message.role === "assistant" ? "AI" : "You"
@@ -78,10 +81,15 @@ export function VapiVoiceAssistant() {
 
       // Handle end of call report with structured data
       if (message.type === "end-of-call-report") {
+        console.log("[v0] End of call report received")
         const structuredData = message.analysis?.structuredData
         const callId = message.call?.id
+        
+        console.log("[v0] Structured data:", JSON.stringify(structuredData, null, 2))
+        console.log("[v0] Call ID:", callId)
 
         if (structuredData && (structuredData.customer_name || structuredData.service_type || structuredData.appointment_date)) {
+          console.log("[v0] Attempting to save booking...")
           try {
             const response = await fetch("/api/bookings/create", {
               method: "POST",
@@ -92,12 +100,19 @@ export function VapiVoiceAssistant() {
               }),
             })
 
+            const result = await response.json()
+            console.log("[v0] Booking API response:", result)
+
             if (!response.ok) {
-              console.error("Failed to save booking")
+              console.error("[v0] Failed to save booking:", result)
+            } else {
+              console.log("[v0] Booking saved successfully!")
             }
           } catch (err) {
-            console.error("Error saving booking:", err)
+            console.error("[v0] Error saving booking:", err)
           }
+        } else {
+          console.log("[v0] No structured data to save or missing required fields")
         }
       }
     })
