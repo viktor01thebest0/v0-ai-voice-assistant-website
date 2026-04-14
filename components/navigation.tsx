@@ -15,6 +15,7 @@ import { useState, useEffect } from "react"
 import { getCurrentUser, logout, type User as UserType } from "@/lib/auth"
 import { useTheme } from "@/lib/theme"
 import { useLanguage } from "@/lib/language"
+import { VapiVoiceAssistant } from "@/components/vapi-voice-assistant"
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -88,10 +89,13 @@ export function Navigation() {
             </button>
             
             {user && (
-              <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1">
-                <LayoutDashboard className="h-4 w-4" />
-                {t("nav.dashboard")}
-              </Link>
+              <>
+                <VapiVoiceAssistant />
+                <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1">
+                  <LayoutDashboard className="h-4 w-4" />
+                  {t("nav.dashboard")}
+                </Link>
+              </>
             )}
 
             <Button
@@ -231,14 +235,19 @@ export function Navigation() {
               {t("nav.pricing")}
             </button>
             {user && (
-              <Link 
-                href="/dashboard" 
-                className="text-muted-foreground hover:text-foreground transition-colors text-left flex items-center gap-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                {t("nav.dashboard")}
-              </Link>
+              <>
+                <div className="flex items-center">
+                  <VapiVoiceAssistant />
+                </div>
+                <Link 
+                  href="/dashboard" 
+                  className="text-muted-foreground hover:text-foreground transition-colors text-left flex items-center gap-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  {t("nav.dashboard")}
+                </Link>
+              </>
             )}
             <Button
               onClick={() => scrollToSection("contact")}
