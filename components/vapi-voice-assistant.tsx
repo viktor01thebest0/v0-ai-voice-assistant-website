@@ -62,11 +62,11 @@ export function VapiVoiceAssistant() {
     vapiInstance.on("call-end", async () => {
       console.log("[v0] Call ended, attempting to save booking from transcript...")
       setCallStatus("idle")
-      
+
       // Try to save booking when call ends using transcript data
       // This is a fallback when structured data is not available
       try {
-        const response = await fetch("/api/bookings/create", {
+        const response = await fetch("/api/bookings/create/route.ts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -92,7 +92,7 @@ export function VapiVoiceAssistant() {
     vapiInstance.on("message", async (message: VapiMessage) => {
       // Debug: Log all messages
       console.log("[v0] VAPI message received:", JSON.stringify(message, null, 2))
-      
+
       // Handle transcript updates
       if (message.type === "transcript" && message.transcriptType === "final" && message.transcript) {
         const role = message.role === "assistant" ? "AI" : "You"
@@ -104,14 +104,14 @@ export function VapiVoiceAssistant() {
         console.log("[v0] End of call report received")
         const structuredData = message.analysis?.structuredData
         const callId = message.call?.id
-        
+
         console.log("[v0] Structured data:", JSON.stringify(structuredData, null, 2))
         console.log("[v0] Call ID:", callId)
 
         if (structuredData && (structuredData.customer_name || structuredData.service_type || structuredData.appointment_date)) {
           console.log("[v0] Attempting to save booking...")
           try {
-            const response = await fetch("/api/bookings/create", {
+            const response = await fetch("/api/bookings/create/route.ts", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -221,13 +221,12 @@ export function VapiVoiceAssistant() {
             <button
               onClick={callStatus === "idle" ? startCall : endCall}
               disabled={callStatus === "connecting" || callStatus === "ending"}
-              className={`relative flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300 ${
-                callStatus === "active"
+              className={`relative flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300 ${callStatus === "active"
                   ? "bg-destructive hover:bg-destructive/90 animate-pulse"
                   : callStatus === "connecting" || callStatus === "ending"
                     ? "bg-muted cursor-not-allowed"
                     : "bg-primary hover:bg-primary/90"
-              }`}
+                }`}
             >
               {callStatus === "connecting" || callStatus === "ending" ? (
                 <Loader2 className="h-10 w-10 text-white animate-spin" />
