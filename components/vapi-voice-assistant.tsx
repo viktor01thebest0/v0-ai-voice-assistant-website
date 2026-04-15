@@ -66,7 +66,7 @@ export function VapiVoiceAssistant() {
       // Try to save booking when call ends using transcript data
       // This is a fallback when structured data is not available
       try {
-        const response = await fetch("/api/bookings/create/route.ts", {
+        const response = await fetch("/api/bookings/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -111,7 +111,7 @@ export function VapiVoiceAssistant() {
         if (structuredData && (structuredData.customer_name || structuredData.service_type || structuredData.appointment_date)) {
           console.log("[v0] Attempting to save booking...")
           try {
-            const response = await fetch("/api/bookings/create/route.ts", {
+            const response = await fetch("/api/bookings/create", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
