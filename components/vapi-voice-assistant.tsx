@@ -59,28 +59,11 @@ export function VapiVoiceAssistant() {
       setError(null)
     })
 
-    vapiInstance.on("call-end", async () => {
-      console.log("[v0] Call ended, attempting to save booking from transcript...")
+    vapiInstance.on("call-end", () => {
+      console.log("[v0] Call ended")
       setCallStatus("idle")
-
-      // Try to save booking when call ends using transcript data
-      // This is a fallback when structured data is not available
-      try {
-        const response = await fetch("/api/bookings/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            call_id: `call-${Date.now()}`,
-            customer_name: "Voice Call Customer",
-            notes: "Booking from voice call - please review transcript for details",
-            created_via: "vapi-web-call"
-          }),
-        })
-        const result = await response.json()
-        console.log("[v0] Call-end booking save result:", result)
-      } catch (err) {
-        console.error("[v0] Error saving on call-end:", err)
-      }
+      // Note: Booking is saved via end-of-call-report message handler
+      // which contains the structured data from VAPI's analysis
     })
 
     vapiInstance.on("error", (err: Error) => {
@@ -101,38 +84,40 @@ export function VapiVoiceAssistant() {
 
       // Handle end of call report with structured data
       if (message.type === "end-of-call-report") {
-        console.log("[v0] End of call report received")
+        console.log("[v0] End of call report received - full message:", JSON.stringify(message, null, 2))
         const structuredData = message.analysis?.structuredData
         const callId = message.call?.id
 
         console.log("[v0] Structured data:", JSON.stringify(structuredData, null, 2))
         console.log("[v0] Call ID:", callId)
 
-        if (structuredData && (structuredData.customer_name || structuredData.service_type || structuredData.appointment_date)) {
-          console.log("[v0] Attempting to save booking...")
-          try {
-            const response = await fetch("/api/bookings/create", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                call_id: callId,
-                ...structuredData,
-              }),
-            })
+        // Always save the booking, even if structured data is incomplete
+        console.log("[v0] Attempting to save booking...")
+        try {
+          const response = await fetch("/api/bookings/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              call_id: callId || `call-${Date.now()}`,
+              customer_name: structuredData?.customer_name || null,
+              phone_number: structuredData?.phone_number || null,
+              service_type: structuredData?.service_type || null,
+              appointment_date: structuredData?.appointment_date || null,
+              appointment_time: structuredData?.appointment_time || null,
+              stylist: structuredData?.stylist || null,
+            }),
+          })
 
-            const result = await response.json()
-            console.log("[v0] Booking API response:", result)
+          const result = await response.json()
+          console.log("[v0] Booking API response:", result)
 
-            if (!response.ok) {
-              console.error("[v0] Failed to save booking:", result)
-            } else {
-              console.log("[v0] Booking saved successfully!")
-            }
-          } catch (err) {
-            console.error("[v0] Error saving booking:", err)
+          if (!response.ok) {
+            console.error("[v0] Failed to save booking:", result)
+          } else {
+            console.log("[v0] Booking saved successfully!")
           }
-        } else {
-          console.log("[v0] No structured data to save or missing required fields")
+        } catch (err) {
+          console.error("[v0] Error saving booking:", err)
         }
       }
     })
