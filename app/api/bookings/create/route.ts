@@ -7,13 +7,26 @@ export async function POST(req: NextRequest) {
     
     console.log("[v0] Booking create API received:", JSON.stringify(body, null, 2))
 
+
+//     "name": "Customer Booking Info",
+//     "result": {
+//         "phone_number": "0877305864",
+//         "service_type": "Подстригване",
+//         "customer_name": "Виктор",
+//         "appointment_date": "22 март",
+//         "appointment_time": "10:00"
+//     }
+// }
+
     const {
+      result: {
+        phone_number,
+        service_type,
+        customer_name,
+        appointment_date,
+        appointment_time,
+      },
       call_id,
-      customer_name,
-      phone_number,
-      service_type,
-      appointment_date,
-      appointment_time,
       stylist,
       notes,
       created_via,
