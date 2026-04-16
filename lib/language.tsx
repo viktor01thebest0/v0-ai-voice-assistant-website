@@ -26,6 +26,17 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.theme.light": "Светла тема",
     "nav.language": "Език",
     
+    // VAPI Voice Assistant
+    "testAi": "Тествай AI",
+    "vapiTitle": "AI Гласов Асистент",
+    "vapiDescription": "Говорете с нашия AI асистент за да направите резервация",
+    "vapiConnecting": "Свързване...",
+    "vapiActive": "Разговорът е активен",
+    "vapiEnding": "Приключване...",
+    "vapiIdle": "Натиснете за разговор",
+    "vapiTranscript": "Транскрипция",
+    "vapiInstructions": "Натиснете бутона за да започнете разговор с нашия AI асистент. Той може да ви помогне с резервации и въпроси.",
+    
     // Dashboard
     "dashboard.title": "Табло за управление",
     "dashboard.conversations": "Общо разговори с AI",
@@ -231,6 +242,17 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.theme.dark": "Dark theme",
     "nav.theme.light": "Light theme",
     "nav.language": "Language",
+    
+    // VAPI Voice Assistant
+    "testAi": "Test AI",
+    "vapiTitle": "AI Voice Assistant",
+    "vapiDescription": "Talk to our AI assistant to make a booking",
+    "vapiConnecting": "Connecting...",
+    "vapiActive": "Call is active",
+    "vapiEnding": "Ending call...",
+    "vapiIdle": "Click to start call",
+    "vapiTranscript": "Transcript",
+    "vapiInstructions": "Click the button to start a conversation with our AI assistant. They can help you with bookings and questions.",
     
     // Dashboard
     "dashboard.title": "Dashboard",

@@ -1,89 +1,65 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { getCurrentUser, type User } from "@/lib/auth"
 import { useLanguage } from "@/lib/language"
-import { 
-  Phone, 
-  Clock, 
-  TrendingUp, 
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Users,
-  BarChart3,
-  PhoneCall,
-  Timer,
-  RefreshCw
-} from "lucide-react"
+import { ArrowLeft, Users, Calendar, Clock, RefreshCw, Phone, Scissors } from "lucide-react"
 
-interface VapiAnalytics {
-  totalCalls: number
-  callsThisMonth: number
-  totalMinutes: number
-  totalHours: number
-  minutesThisMonth: number
-  avgDurationSeconds: number
-  successfulCalls: number
-  failedCalls: number
-  successRate: number
+interface Booking {
+  id: number
+  call_id: string | null
+  customer_name: string | null
+  phone_number: string | null
+  service_type: string | null
+  appointment_date: string | null
+  appointment_time: string | null
+  created_at: string
+}
+
+interface BookingsData {
+  totalBookings: number
   uniqueCustomers: number
-  trend: number
-  recentCalls: {
-    id: string
-    status: string
-    startedAt: string
-    endedAt: string
-    duration: number
-    customerPhone: string
-    endedReason: string
-  }[]
+  todayBookings: number
+  thisMonthBookings: number
+  recentBookings: Booking[]
 }
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [analytics, setAnalytics] = useState<VapiAnalytics | null>(null)
-  const [analyticsLoading, setAnalyticsLoading] = useState(true)
-  const [analyticsError, setAnalyticsError] = useState<string | null>(null)
+  const [data, setData] = useState<BookingsData | null>(null)
+  const [dataLoading, setDataLoading] = useState(false)
   const router = useRouter()
   const { t } = useLanguage()
 
-  const fetchAnalytics = async () => {
-    setAnalyticsLoading(true)
-    setAnalyticsError(null)
+  const isBg = t("nav.about") === "За нас"
+
+  const fetchBookings = useCallback(async () => {
+    setDataLoading(true)
     try {
-      const response = await fetch("/api/vapi/analytics")
-      if (!response.ok) {
-        throw new Error("Failed to fetch analytics")
+      const res = await fetch("/api/bookings")
+      if (res.ok) {
+        const json = await res.json()
+        setData(json)
       }
-      const data = await response.json()
-      setAnalytics(data)
-    } catch (error) {
-      setAnalyticsError("Failed to load analytics")
-      console.error("Analytics error:", error)
+    } catch (err) {
+      console.error("Failed to fetch bookings:", err)
     } finally {
-      setAnalyticsLoading(false)
+      setDataLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     const currentUser = getCurrentUser()
-    if (!currentUser) {
-      router.push("/")
-      return
-    }
+    if (!currentUser) { router.push("/"); return }
     setUser(currentUser)
     setIsLoading(false)
-    fetchAnalytics()
-  }, [router])
-
-  const isBg = t("nav.about") === "За нас"
+    fetchBookings()
+  }, [router, fetchBookings])
 
   if (isLoading) {
     return (
@@ -92,37 +68,21 @@ export default function DashboardPage() {
       </div>
     )
   }
+  if (!user) return null
 
-  if (!user) {
-    return null
-  }
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const formatPhoneNumber = (phone: string) => {
-    if (phone.length > 8) {
-      return `${phone.slice(0, 4)}****${phone.slice(-4)}`
-    }
-    return phone
-  }
+  const hasData = data && data.totalBookings > 0
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Background effects */}
       <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5 pointer-events-none" />
       <div className="fixed top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link href="/">
-              <Button variant="ghost" size="sm" className="mb-4">
+              <Button variant="ghost" size="sm" className="mb-4 bg-transparent">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 {isBg ? "Назад към началото" : "Back to home"}
               </Button>
@@ -135,152 +95,35 @@ export default function DashboardPage() {
               </span>
             </p>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={fetchAnalytics}
-            disabled={analyticsLoading}
-            className="gap-2 bg-transparent"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchBookings}
+            disabled={dataLoading}
+            className="bg-transparent"
           >
-            <RefreshCw className={`h-4 w-4 ${analyticsLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`mr-2 h-4 w-4 ${dataLoading ? "animate-spin" : ""}`} />
             {isBg ? "Обнови" : "Refresh"}
           </Button>
         </div>
 
-        {analyticsError && (
-          <Card className="bg-destructive/10 border-destructive/50 mb-6">
-            <CardContent className="py-4">
-              <p className="text-destructive text-sm">{analyticsError}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Main Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {/* Total Calls */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {isBg ? "Общо обаждания" : "Total Calls"}
+                {isBg ? "Общо резервации" : "Total Bookings"}
               </CardTitle>
-              <Phone className="h-5 w-5 text-primary" />
+              <Calendar className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {analyticsLoading ? "..." : analytics?.totalCalls.toLocaleString() || 0}
-              </div>
-              {analytics && analytics.trend !== 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  <span className={analytics.trend > 0 ? "text-green-500" : "text-red-500"}>
-                    {analytics.trend > 0 ? "+" : ""}{analytics.trend}%
-                  </span> {isBg ? "тренд" : "trend"}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Calls This Month */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {isBg ? "Обаждания този месец" : "Calls This Month"}
-              </CardTitle>
-              <PhoneCall className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {analyticsLoading ? "..." : analytics?.callsThisMonth || 0}
-              </div>
+              <div className="text-3xl font-bold">{data?.totalBookings ?? 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {analyticsLoading ? "..." : `${analytics?.minutesThisMonth || 0} ${isBg ? "минути" : "minutes"}`}
+                {isBg ? "Всички записани часове" : "All time appointments"}
               </p>
             </CardContent>
           </Card>
 
-          {/* Total Duration */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {isBg ? "Общо време" : "Total Duration"}
-              </CardTitle>
-              <Clock className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {analyticsLoading ? "..." : `${analytics?.totalHours || 0}h`}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {analyticsLoading ? "..." : `${analytics?.totalMinutes || 0} ${isBg ? "минути общо" : "minutes total"}`}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Average Duration */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {isBg ? "Средна продължителност" : "Avg Duration"}
-              </CardTitle>
-              <Timer className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {analyticsLoading ? "..." : formatDuration(analytics?.avgDurationSeconds || 0)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {isBg ? "на обаждане" : "per call"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Secondary Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Success Rate */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {isBg ? "Успешни обаждания" : "Success Rate"}
-              </CardTitle>
-              <TrendingUp className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {analyticsLoading ? "..." : `${analytics?.successRate || 0}%`}
-              </div>
-              <Progress value={analytics?.successRate || 0} className="mt-2 h-2" />
-            </CardContent>
-          </Card>
-
-          {/* Successful vs Failed */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {isBg ? "Статус на обажданията" : "Call Status"}
-              </CardTitle>
-              <CheckCircle className="h-5 w-5 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <div>
-                  <div className="text-2xl font-bold text-green-500">
-                    {analyticsLoading ? "..." : analytics?.successfulCalls || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{isBg ? "Успешни" : "Successful"}</p>
-                </div>
-                <div className="h-10 w-px bg-border" />
-                <div>
-                  <div className="text-2xl font-bold text-red-500">
-                    {analyticsLoading ? "..." : analytics?.failedCalls || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{isBg ? "Неуспешни" : "Failed"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Unique Customers */}
-          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all duration-300">
+          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {isBg ? "Уникални клиенти" : "Unique Customers"}
@@ -288,77 +131,106 @@ export default function DashboardPage() {
               <Users className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {analyticsLoading ? "..." : analytics?.uniqueCustomers || 0}
-              </div>
+              <div className="text-3xl font-bold">{data?.uniqueCustomers ?? 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {isBg ? "различни номера" : "different numbers"}
+                {isBg ? "По телефонен номер" : "By phone number"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {isBg ? "Този месец" : "This Month"}
+              </CardTitle>
+              <Clock className="h-5 w-5 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{data?.thisMonthBookings ?? 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isBg ? "Резервации през месеца" : "Bookings this month"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 backdrop-blur border-border hover:border-primary/50 transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {isBg ? "Днешни часове" : "Today's Bookings"}
+              </CardTitle>
+              <Calendar className="h-5 w-5 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{data?.todayBookings ?? 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isBg ? "Записани за днес" : "Scheduled for today"}
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Calls */}
         <Card className="bg-card/50 backdrop-blur border-border">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  {isBg ? "Последни обаждания" : "Recent Calls"}
-                </CardTitle>
-                <CardDescription>
-                  {isBg ? "Последните 10 обаждания от Vapi" : "Last 10 calls from Vapi"}
-                </CardDescription>
-              </div>
-            </div>
+            <CardTitle className="text-lg">
+              {isBg ? "Последни резервации" : "Recent Bookings"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {analyticsLoading ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {isBg ? "Зареждане..." : "Loading..."}
+            {!hasData ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Calendar className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                  {isBg ? "Все още няма резервации" : "No bookings yet"}
+                </h3>
+                <p className="text-sm text-muted-foreground/70 text-center max-w-md">
+                  {isBg
+                    ? "Когато клиенти се обадят и запишат час чрез AI агента, резервациите ще се показват тук."
+                    : "When customers call and book appointments through the AI agent, bookings will appear here."}
+                </p>
               </div>
-            ) : analytics?.recentCalls && analytics.recentCalls.length > 0 ? (
+            ) : (
               <div className="space-y-3">
-                {analytics.recentCalls.map((call) => (
-                  <div 
-                    key={call.id} 
-                    className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border hover:border-primary/30 transition-colors"
+                {data.recentBookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="flex items-center justify-between p-4 rounded-lg bg-background/50 border border-border hover:border-primary/30 transition-all"
                   >
-                    <div className="flex items-center gap-3">
-                      {call.endedReason === "assistant-ended-call" ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Scissors className="h-5 w-5 text-primary" />
+                      </div>
                       <div>
-                        <p className="text-sm font-medium">
-                          {formatPhoneNumber(call.customerPhone)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(call.startedAt).toLocaleString(isBg ? 'bg-BG' : 'en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
+                        <p className="font-medium">{booking.customer_name || (isBg ? "Неизвестен" : "Unknown")}</p>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          {booking.phone_number && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {booking.phone_number}
+                            </span>
+                          )}
+                          {booking.service_type && (
+                            <span className="px-2 py-0.5 bg-primary/10 rounded text-xs text-primary">
+                              {booking.service_type}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">
-                        {formatDuration(call.duration)}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {call.endedReason?.replace(/-/g, ' ') || call.status}
-                      </p>
+                      {booking.appointment_date && (
+                        <p className="text-sm font-medium">{booking.appointment_date}</p>
+                      )}
+                      {booking.appointment_time && (
+                        <p className="text-xs text-muted-foreground">{booking.appointment_time}</p>
+                      )}
+                      {!booking.appointment_date && (
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(booking.created_at).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {isBg ? "Няма обаждания все още" : "No calls yet"}
               </div>
             )}
           </CardContent>
