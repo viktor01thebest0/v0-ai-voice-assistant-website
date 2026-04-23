@@ -10,12 +10,12 @@ export async function POST(req: NextRequest) {
 
     const {
       result: {
+        stylist,
         phone_number,
         service_type,
         customer_name,
         appointment_date,
         appointment_time,
-        stylist,
       },
       call_id,
       notes,
