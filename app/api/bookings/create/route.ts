@@ -4,19 +4,9 @@ import { sql } from "@/lib/db"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    
+
     console.log("[v0] Booking create API received:", JSON.stringify(body, null, 2))
 
-
-//     "name": "Customer Booking Info",
-//     "result": {
-//         "phone_number": "0877305864",
-//         "service_type": "Подстригване",
-//         "customer_name": "Виктор",
-//         "appointment_date": "22 март",
-//         "appointment_time": "10:00"
-//     }
-// }
 
     const {
       result: {
@@ -25,9 +15,9 @@ export async function POST(req: NextRequest) {
         customer_name,
         appointment_date,
         appointment_time,
+        stylist,
       },
       call_id,
-      stylist,
       notes,
       created_via,
     } = body
@@ -46,7 +36,7 @@ export async function POST(req: NextRequest) {
       )
       RETURNING id
     `
-    
+
     console.log("[v0] Booking created with id:", result[0]?.id)
 
     return NextResponse.json({ ok: true, message: "Booking created successfully", id: result[0]?.id })
