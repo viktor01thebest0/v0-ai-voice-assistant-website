@@ -1,0 +1,130 @@
+{
+  "id": "8a537f3d-46db-48cb-a742-8eaceeeee087",
+  "orgId": "b5e954c3-9803-4482-ba22-d88937a772d7",
+  "name": "Sofia",
+  "voice": {
+    "model": "gpt-4o-mini-tts",
+    "voiceId": "shimmer",
+    "provider": "openai"
+  },
+  "createdAt": "2026-01-19T14:10:19.166Z",
+  "updatedAt": "2026-03-19T15:33:50.927Z",
+  "model": {
+    "model": "gpt-5.2-chat-latest",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Ти си София – приятелски, професионален и спокоен гласов асистент на фризьорско студио „Luxury Hair Studio“. Говориш естествено, уверено и учтиво, сякаш си реален рецепционист. Основната ти задача е да записваш часове за клиенти по телефона и да водиш разговора така, че плавно и логично да събереш цялата необходима информация.\n\nСтудиото предлага следните услуги: Подстригване, Боядисване, Кичур, Прическа, Маникюр и Педикюр. Наличните стилисти са: Мария, Анна, Елена и София. Работното време е от понеделник до петък от 9:00 до 18:00 часа и в събота от 10:00 до 16:00 часа. Неделя е почивен ден.\n\nПо време на разговора трябва да събереш следната информация: услуга, дата, час, стилист и име на клиента. Ако клиентът не даде някоя от тези информации, задай кратък и ясен въпрос само за липсващото. Не задавай повече от един въпрос наведнъж. Води разговора уверено и структурирано.\n\nВинаги преди финално потвърждение задължително обобщавай информацията, като кажеш: „Само да потвърдя – искате час за [услуга], на [дата] в [час], при [стилист]. Така ли е?“ Изчакай клиентът да потвърди, преди да приключиш.\n\nАко избраният час или стилист не са налични, се извини учтиво и помоли клиента да избере друга дата или час. Говори кратко, ясно и спокойно, без технически термини и без да обясняваш вътрешни процеси. Никога не казвай, че си AI модел или система.\n\nСлед успешно записване на часа приключи разговора с: „Чудесно! Записах ви час за [дата] в [час] за [услуга] при [стилист]. Благодарим ви, че се свързахте с Luxury Hair Studio. Приятен ден!“ и завърши разговора учтиво."
+      }
+    ],
+    "provider": "openai"
+  },
+  "firstMessage": "Здравейте! Обаждате се във Luxury Hair Studio. Казвам се София и съм вашият асистент. Как мога да ви помогна днес?",
+  "voicemailMessage": "Обадете се когато сте свободени.",
+  "endCallMessage": "Довиждане и приятен ден!",
+  "transcriber": {
+    "model": "nova-3",
+    "language": "bg",
+    "provider": "deepgram"
+  },
+  "serverMessages": [
+    "conversation-update",
+    "end-of-call-report",
+    "function-call",
+    "hang",
+    "speech-update",
+    "status-update",
+    "tool-calls",
+    "transfer-destination-request",
+    "handoff-destination-request",
+    "user-interrupted",
+    "assistant.started",
+    "transcript"
+  ],
+  "serverUrl": "https://v0-voxal.vercel.app/api/vapi-webhook",
+  "analysisPlan": {
+    "summaryPlan": {
+      "enabled": true
+    },
+    "structuredDataPlan": {
+      "enabled": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "service_type",
+          "customer_name",
+          "appointment_date",
+          "appointment_time"
+        ],
+        "properties": {
+          "stylist": {
+            "description": "Името на избрания стилист (Мария, Анна, Елена или София).",
+            "type": "string"
+          },
+          "phone_number": {
+            "description": "Телефонният номер на клиента, ако е споменат по време на разговора.",
+            "type": "string"
+          },
+          "service_type": {
+            "description": "Видът на услугата, за която е записан час.",
+            "type": "string"
+          },
+          "customer_name": {
+            "description": "Името на клиента, който записва час.",
+            "type": "string"
+          },
+          "appointment_date": {
+            "description": "Датата на записания час във формат YYYY-MM-DD. Ако клиентът не посочи година, използвай текущата календарна година.",
+            "type": "string"
+          },
+          "appointment_time": {
+            "description": "Часът на записания час във формат HH:MM.",
+            "type": "string"
+          }
+        }
+      },
+      "messages": [
+        {
+          "content": "You are an expert data extractor. You will be given a transcript of a call. Extract structured data per the JSON Schema. If the user does not explicitly mention a year for the appointment date, use the current calendar year at the time of the call. If the provided date has already passed in the current year, assume the next calendar year. DO NOT return anything except the structured data JSON.\n\nJson Schema:\n{{schema}}\n\nOnly respond with the JSON.",
+          "role": "system"
+        },
+        {
+          "content": "Here is the transcript:\n\n{{transcript}}\n\n. Here is the ended reason of the call:\n\n{{endedReason}}\n\n",
+          "role": "user"
+        }
+      ]
+    },
+    "successEvaluationPlan": {
+      "enabled": false
+    }
+  },
+  "voicemailDetection": {
+    "provider": "vapi",
+    "backoffPlan": {
+      "maxRetries": 6,
+      "startAtSeconds": 5,
+      "frequencySeconds": 5
+    },
+    "beepMaxAwaitSeconds": 0
+  },
+  "artifactPlan": {
+    "structuredOutputIds": [
+      "d2596a92-ce4e-477b-be8a-6c9eb2e640a5"
+    ]
+  },
+  "messagePlan": {
+    "idleMessages": [
+      "Има ли нещо друго, с което мога да ви помогна?"
+    ]
+  },
+  "server": {
+    "url": "https://v0-voxal.vercel.app/api/vapi-webhook",
+    "timeoutSeconds": 20
+  },
+  "compliancePlan": {
+    "hipaaEnabled": false,
+    "pciEnabled": false,
+    "zdrEnabled": false
+  },
+  "isServerUrlSecretSet": false
+}
