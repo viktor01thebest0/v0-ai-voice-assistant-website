@@ -24,6 +24,9 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
   const [signupPassword, setSignupPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState("")
+  const [forgotSuccess, setForgotSuccess] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,6 +57,35 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
       setLoginPassword("")
     } catch (err) {
       console.error("[v0] Login error:", err)
+      setError("Възникна грешка. Моля, опитайте отново.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Възникна грешка")
+        setLoading(false)
+        return
+      }
+
+      setForgotSuccess(true)
+    } catch (err) {
+      console.error("[v0] Forgot password error:", err)
       setError("Възникна грешка. Моля, опитайте отново.")
     } finally {
       setLoading(false)
