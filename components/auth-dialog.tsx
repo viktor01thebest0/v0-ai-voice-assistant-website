@@ -27,6 +27,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [forgotEmail, setForgotEmail] = useState("")
   const [forgotSuccess, setForgotSuccess] = useState(false)
+  const [resetUrl, setResetUrl] = useState<string | null>(null)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,12 +79,17 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
       const data = await response.json()
 
       if (!response.ok) {
+        // If email sending failed but we got a resetUrl, show it for testing
+        if (data.resetUrl) {
+          setResetUrl(data.resetUrl)
+        }
         setError(data.error || "Възникна грешка")
         setLoading(false)
         return
       }
 
       setForgotSuccess(true)
+      setResetUrl(null)
     } catch (err) {
       console.error("[v0] Forgot password error:", err)
       setError("Възникна грешка. Моля, опитайте отново.")
@@ -155,36 +161,117 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
           </TabsList>
 
           <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Имейл</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  placeholder="вашият@имейл.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+            {!showForgotPassword ? (
+              <form onSubmit={handleLogin} className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Имейл</Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="вашият@имейл.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">Парола</Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(true)
+                    setError("")
+                    setForgotSuccess(false)
+                  }}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Забравена парола?
+                </button>
+                {error && <p className="text-sm text-red-500">{error}</p>}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Зареждане..." : "Влез"}
+                </Button>
+              </form>
+            ) : (
+              <div className="space-y-4 py-4">
+                {!forgotSuccess ? (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Въведете вашия имейл адрес и ще ви изпратим линк за възстановяване на паролата.
+                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="forgot-email">Имейл</Label>
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="вашият@имейл.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {resetUrl && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800 font-medium">За тест (Resend free tier):</p>
+                        <a 
+                          href={resetUrl} 
+                          className="text-sm text-blue-600 hover:underline break-all"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Натиснете тук за да възстановите паролата
+                        </a>
+                      </div>
+                    )}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Изпращане..." : "Изпрати линк"}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false)
+                        setError("")
+                      }}
+                      className="text-sm text-primary hover:underline w-full text-center"
+                    >
+                      Обратно към вход
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center space-y-4">
+                    <div className="text-green-600 text-lg font-medium">Имейлът е изпратен!</div>
+                    <p className="text-sm text-muted-foreground">
+                      Проверете вашата поща за линк за възстановяване на паролата.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false)
+                        setForgotSuccess(false)
+                        setForgotEmail("")
+                        setError("")
+                      }}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Обратно към вход
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="login-password">Парола</Label>
-                <Input
-                  id="login-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Зареждане..." : "Влез"}
-              </Button>
-            </form>
+            )}
           </TabsContent>
 
           <TabsContent value="signup">
