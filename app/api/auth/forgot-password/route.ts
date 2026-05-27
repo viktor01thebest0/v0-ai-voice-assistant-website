@@ -83,8 +83,12 @@ export async function POST(req: NextRequest) {
 
     if (emailResult.error) {
       console.error("[v0] Resend error:", emailResult.error)
+      // Return detailed error for debugging
       return NextResponse.json(
-        { error: "Failed to send email. Please try again." },
+        { 
+          error: `Failed to send email: ${emailResult.error.message || 'Unknown error'}. Note: On Resend free tier, you can only send to your verified email address.`,
+          resetUrl: resetUrl // Include reset URL for testing purposes
+        },
         { status: 500 }
       )
     }

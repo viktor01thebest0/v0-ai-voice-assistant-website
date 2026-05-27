@@ -27,6 +27,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [forgotEmail, setForgotEmail] = useState("")
   const [forgotSuccess, setForgotSuccess] = useState(false)
+  const [resetUrl, setResetUrl] = useState<string | null>(null)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,12 +79,17 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
       const data = await response.json()
 
       if (!response.ok) {
+        // If email sending failed but we got a resetUrl, show it for testing
+        if (data.resetUrl) {
+          setResetUrl(data.resetUrl)
+        }
         setError(data.error || "Възникна грешка")
         setLoading(false)
         return
       }
 
       setForgotSuccess(true)
+      setResetUrl(null)
     } catch (err) {
       console.error("[v0] Forgot password error:", err)
       setError("Възникна грешка. Моля, опитайте отново.")
@@ -217,6 +223,19 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                       />
                     </div>
                     {error && <p className="text-sm text-red-500">{error}</p>}
+                    {resetUrl && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800 font-medium">За тест (Resend free tier):</p>
+                        <a 
+                          href={resetUrl} 
+                          className="text-sm text-blue-600 hover:underline break-all"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Натиснете тук за да възстановите паролата
+                        </a>
+                      </div>
+                    )}
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? "Изпращане..." : "Изпрати линк"}
                     </Button>
