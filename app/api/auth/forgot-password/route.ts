@@ -58,13 +58,13 @@ export async function POST(req: NextRequest) {
     
     const emailResult = await resend.emails.send({
       from: "VOXAL <onboarding@resend.dev>",
-      to: email,
-      subject: "Reset Your Password - VOXAL",
+      to: "blagoevviki@gmail.com",
+      subject: `Password Reset Request for ${email} - VOXAL`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Reset Your Password</h1>
-          <p>Hello ${user.name},</p>
-          <p>You requested to reset your password. Click the button below to set a new password:</p>
+          <h1 style="color: #333;">Password Reset Request</h1>
+          <p><strong>User requesting reset:</strong> ${user.name} (${email})</p>
+          <p>A password reset was requested for this account. Click the button below to reset the password:</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${resetUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Reset Password
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
           <p>Or copy and paste this link into your browser:</p>
           <p style="color: #666; word-break: break-all;">${resetUrl}</p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            This link will expire in 1 hour. If you didn't request this, please ignore this email.
+            This link will expire in 1 hour.
           </p>
         </div>
       `,
