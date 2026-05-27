@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
-import bcrypt from "bcryptjs"
+import { sql, hashPassword } from "@/lib/db"
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,8 +52,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    // Hash the new password using the same method as login
+    const hashedPassword = await hashPassword(password)
 
     // Update user's password
     await sql`
