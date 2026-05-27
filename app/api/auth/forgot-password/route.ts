@@ -52,8 +52,12 @@ export async function POST(req: NextRequest) {
     const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
     // Send email
-    await resend.emails.send({
-      from: "VOXAL <noreply@resend.dev>",
+    console.log("[v0] Sending password reset email to:", email)
+    console.log("[v0] Reset URL:", resetUrl)
+    console.log("[v0] RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY)
+    
+    const emailResult = await resend.emails.send({
+      from: "VOXAL <onboarding@resend.dev>",
       to: email,
       subject: "Reset Your Password - VOXAL",
       html: `
@@ -74,6 +78,16 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     })
+
+    console.log("[v0] Email send result:", JSON.stringify(emailResult, null, 2))
+
+    if (emailResult.error) {
+      console.error("[v0] Resend error:", emailResult.error)
+      return NextResponse.json(
+        { error: "Failed to send email. Please try again." },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ 
       ok: true, 
