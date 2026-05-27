@@ -155,36 +155,104 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
           </TabsList>
 
           <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Имейл</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  placeholder="вашият@имейл.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+            {!showForgotPassword ? (
+              <form onSubmit={handleLogin} className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Имейл</Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="вашият@имейл.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">Парола</Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(true)
+                    setError("")
+                    setForgotSuccess(false)
+                  }}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Забравена парола?
+                </button>
+                {error && <p className="text-sm text-red-500">{error}</p>}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Зареждане..." : "Влез"}
+                </Button>
+              </form>
+            ) : (
+              <div className="space-y-4 py-4">
+                {!forgotSuccess ? (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Въведете вашия имейл адрес и ще ви изпратим линк за възстановяване на паролата.
+                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="forgot-email">Имейл</Label>
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="вашият@имейл.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Изпращане..." : "Изпрати линк"}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false)
+                        setError("")
+                      }}
+                      className="text-sm text-primary hover:underline w-full text-center"
+                    >
+                      Обратно към вход
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center space-y-4">
+                    <div className="text-green-600 text-lg font-medium">Имейлът е изпратен!</div>
+                    <p className="text-sm text-muted-foreground">
+                      Проверете вашата поща за линк за възстановяване на паролата.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false)
+                        setForgotSuccess(false)
+                        setForgotEmail("")
+                        setError("")
+                      }}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Обратно към вход
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="login-password">Парола</Label>
-                <Input
-                  id="login-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Зареждане..." : "Влез"}
-              </Button>
-            </form>
+            )}
           </TabsContent>
 
           <TabsContent value="signup">
